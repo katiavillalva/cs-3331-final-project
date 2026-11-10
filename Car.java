@@ -2,7 +2,7 @@
  * Abstract base class representing a generic vehicle in the Miner Cars Dealership system.
  * Serves as the superclass for specific car types such as Sedan, SUV, Hatchback, and Pickup.
  * 
- * @author [Your Name]
+ * @author Jean Jose Rendon Sifontes, Katia Villalva
  * @version 1.0
  * @since November 10, 2026
  */
