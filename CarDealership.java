@@ -1,38 +1,55 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ArrayList;
 
 /**
- * Represents a car dealership with a name, inventory of cars, list of users (admins and customers), and revenue.
+ * Represents a car dealership managing inventory, users, and financial revenue.
+ * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
+ * @version 1.0
+ * @since November 10, 2026
  */
-public class CarDealership{
+public class CarDealership {
     private String name;
     private ArrayList<Car> inventory = new ArrayList<>();
     private Map<String, User> users = new HashMap<>();
     private double revenue = 0.0;
 
     /**
-     * Constructs a new CarDealership with the specified name. Other attributes are assigned default values.
+     * Constructs a new CarDealership with the specified name. 
+     * Initializes an empty inventory, an empty user map, and sets revenue to 0.0.
+     * 
      * @param name the official name of the dealership
      */
     public CarDealership(String name) {
         this.name = name;
     }
 
-    // Setters
+    // ==================== Setters ====================
+
+    /**
+     * Updates the name of the dealership.
+     * @param name the new name to set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
-    // Getters
-    public String getName() {return name; }
+    // ==================== Getters ====================
 
-    public ArrayList<Car> getInventory() {return this.inventory;}
+    /** @return the name of the dealership */
+    public String getName() { return name; }
 
-    public Map<String, User> getUsers() {return this.users;}
+    /** @return the list of cars in the inventory */
+    public ArrayList<Car> getInventory() { return this.inventory; }
 
-    public double getRevenue() {return revenue;}
+    /** @return the map of users registered in the system */
+    public Map<String, User> getUsers() { return this.users; }
+
+    /** @return the total revenue accumulated by the dealership */
+    public double getRevenue() { return revenue; }
+
+    // ==================== Core Methods ====================
 
     /**
      * Adds a car to the dealership's inventory list. 
@@ -43,7 +60,7 @@ public class CarDealership{
     }
 
     /**
-     * Adds a user to the dealership's list of users. 
+     * Adds a user to the dealership's map of users using their username as the key. 
      * @param user the User object to add
      */
     public void addUser(User user) {
@@ -64,16 +81,16 @@ public class CarDealership{
     }
 
     /**
-     * Displays the dealership name and the information of all cars in the inventory. 
+     * Displays the dealership name and the information of all cars in the inventory, regardless of availability. 
      */
     public void displayAllCars() {
-        System.out.println(this.name + "Inventory :");
+        System.out.println(this.name + " Inventory:");
         for (Car car : this.inventory) {
             car.displayInformation();
         }
     }
  
-    /*
+    /**
      * Displays the dealership name and the information of all cars in the inventory that have at least one car available. 
      */
     public void displayAvailableCars() {
@@ -85,13 +102,16 @@ public class CarDealership{
         }
     }
 
-    /** Displays the dealership name and the information of all available cars that match the search within 5000 of the inputted price 
-     * @param idIn the car ID inputted by the user 
-     * @param carTypeIn the car type inputted by the user
-     * @param conditionIn the condition inputted by the user
-     * @param priceIn the price inputted by the user
+    /**
+     * Displays the information of available cars that match the specified search criteria 
+     * (ID, car type, condition, or a price range within +/- $5,000).
+     * 
+     * @param idIn        the car ID inputted by the user (-1 to ignore)
+     * @param carTypeIn   the car type inputted by the user (null to ignore)
+     * @param conditionIn the condition inputted by the user (null to ignore)
+     * @param priceIn     the target price inputted by the user (-1 to ignore)
      */
-    public void filterCars(int idIn, String carTypeIn, String conditionIn, double priceIn){
+    public void filterCars(int idIn, String carTypeIn, String conditionIn, double priceIn) {
         System.out.println(this.name + " Filtered Cars:");
         for (Car car : this.inventory) {
             if ((idIn == -1 || car.getId() == idIn) &&
