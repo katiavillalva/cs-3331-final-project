@@ -1,2 +1,4 @@
 *.class
 log.txt
+user_data.csv
+car_data.csv
