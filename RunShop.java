@@ -86,6 +86,7 @@ public class RunShop {
         try {
             money = Double.parseDouble(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
+            System.out.println("Invalid money format. Balance set to $0.00.");
             money = 0.0;
         }
 
@@ -96,7 +97,7 @@ public class RunShop {
             System.out.println("Registration successful! You can now log in.");
             logger.writeLog(username, "Registered new customer account.");
         } else {
-            System.out.println("Registration failed: Username may already exist or error occurred.");
+            System.out.println("Registration failed.");
             logger.writeLog(username, "Failed registration attempt.");
         }
     }

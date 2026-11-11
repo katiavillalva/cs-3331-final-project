@@ -76,7 +76,7 @@ public class Customer extends User {
      */
     public void updateMoneyAvailable(double amountIn) {
         if (this.moneyAvailable + amountIn < 0) {
-            throw new IllegalArgumentException("Insufficient funds. Cannot deduct more than the available balance.");
+            throw new IllegalArgumentException("Remaining account balance cannot be negative.");
         } 
         this.moneyAvailable += amountIn;
     }

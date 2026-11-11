@@ -271,12 +271,18 @@ public class CarDealership {
      */
     public boolean registerCustomer(String firstName, String lastName, String username, String password, double moneyAvailable) {
         if (this.users.containsKey(username)) {
+            System.out.println("Error: Username already exists. Please choose a different username.");
             return false;
         }
 
         int newId = this.users.size() + 1001;
         Customer newCustomer = new Customer(firstName, lastName, newId, username, password);
-        newCustomer.updateMoneyAvailable(moneyAvailable);
+        try {
+            newCustomer.updateMoneyAvailable(moneyAvailable);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
         newCustomer.setIsMember(false);
 
         addUser(newCustomer);
