@@ -92,12 +92,12 @@ public class CarDealership{
      * @param priceIn the price inputted by the user
      */
     public void filterCars(int idIn, String carTypeIn, String conditionIn, double priceIn){
-        System.out.println(this.name + " Filtered Cars:");
+        int priceRange = 5000; // Define the price range for filtering
         for (Car car : this.inventory) {
             if ((idIn == -1 || car.getId() == idIn) &&
                 (carTypeIn == null || car.getCarType().equalsIgnoreCase(carTypeIn)) &&
                 (conditionIn == null || car.getCondition().equalsIgnoreCase(conditionIn)) &&
-                (priceIn == -1 || (car.getPrice() <= priceIn + 5000 && car.getPrice() >= priceIn - 5000)) && 
+                (priceIn == -1 || (car.getPrice() <= priceIn + priceRange && car.getPrice() >= priceIn - priceRange))) && 
                 car.getCarsAvailable() > 0) {
                 car.displayInformation();
             }
