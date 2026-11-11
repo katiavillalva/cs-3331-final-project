@@ -81,28 +81,44 @@ public class Customer extends User {
         this.moneyAvailable += amountIn;
     }
 
-    /**
-     * Attempts to purchase a car from the dealership. Verifies availability and 
-     * updates the customer's budget, car inventory stock, purchase count, and dealership revenue.
+/**
+     * Attempts to purchase the specified car. Validates if the customer has 
+     * sufficient funds, deducts the car price from their available balance, 
+     * and increments the number of cars purchased.
      * 
-     * @param car        the car object the customer wishes to purchase
-     * @param dealership the dealership managing the vehicle and overall revenue
-     * @return true if the purchase is successful, false if the car is unavailable
+     * @param carIn the Car object to purchase
+     * @return true if the purchase was successful, false if funds are insufficient or car is null
      */
-    public boolean purchaseCar(Car car, CarDealership dealership) {
-        if (car.getCarsAvailable() <= 0) {
-            System.out.println("Sorry, this car is not available for purchase.");
+    public boolean purchaseCar(Car carIn) {
+        if (carIn == null) {
             return false;
         }
-
-        // Deduct price from customer budget, reduce stock, increment purchase counter, and add revenue
-        this.updateMoneyAvailable(-car.getPrice());
-        car.setCarsAvailable(car.getCarsAvailable() - 1);
-        this.numCarsPurchased++;
-        dealership.updateRevenue(car.getPrice());
         
-        System.out.println("You have successfully purchased the " + car.getModel() + 
-                           ". The remaining balance in your account is: $" + this.moneyAvailable);
-        return true;
+        if (this.moneyAvailable >= carIn.getPrice()) {
+            this.moneyAvailable -= carIn.getPrice();
+            this.numCarsPurchased++;
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Displays the complete profile information of the customer, 
+     * including ID, name, credentials, balance, cars purchased, 
+     * membership status, and user type.
+     */
+    @Override
+    public void displayProfile() {
+        System.out.println("\n--- CUSTOMER PROFILE ---");
+        System.out.println("User ID: " + getUserID());
+        System.out.println("First Name: " + getFirstName());
+        System.out.println("Last Name: " + getLastName());
+        System.out.println("Username: " + getUsername());
+        System.out.println("Password: " + getPassword());
+        System.out.println("Money Available: $" + getMoneyAvailable());
+        System.out.println("Cars Purchased: " + getNumCarsPurchased());
+        System.out.println("MinerCars Membership: " + getIsMember());
+        System.out.println("User Type: " + getUserType());
     }
 }
