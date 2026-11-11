@@ -1,43 +1,37 @@
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Handles activity logging for the Miner Cars Dealership system, 
- * writing timestamped actions to a persistent log file.
+ * Handles system logging operations with precise timestamp formatting.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 1.0
+ * @version 2.1
  * @since November 10, 2026
  */
 public class Log {
-    private String logFilePath;
+    private String logFileName;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss MM/dd/yy");
 
-    /**
-     * Constructs a Log manager with a specified file path.
-     * 
-     * @path logFilePath the path to the log text file
-     */
-    public Log(String logFilePath) {
-        this.logFilePath = logFilePath;
+    public Log(String logFileName) {
+        this.logFileName = logFileName;
     }
 
     /**
-     * Writes a timestamped log entry recording a user's action.
+     * Writes a structured log entry to the log file.
      * 
-     * @param username the username of the person performing the action
-     * @param action   description of the action performed
+     * @param username the user performing the action
+     * @param action   description of the action
      */
     public void writeLog(String username, String action) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss MM/dd/yy");
-        LocalDateTime now = LocalDateTime.now();
-        String timestamp = dtf.format(now);
+        String timestamp = LocalDateTime.now().format(FORMATTER);
         String logEntry = timestamp + " - " + username + " " + action;
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(logFilePath, true))) {
-            writer.println(logEntry);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(logFileName, true))) {
+            bw.write(logEntry);
+            bw.newLine();
         } catch (IOException e) {
             System.out.println("Error writing to log file: " + e.getMessage());
         }
