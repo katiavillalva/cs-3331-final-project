@@ -449,8 +449,8 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         }
     }
 
-    /**
-     * Handles the password change workflow for the authenticated customer.
+/**
+     * Handles changing the customer's password and handles validation exceptions.
      * 
      * @param scanner  active console scanner
      * @param customer the currently logged-in Customer instance
@@ -465,9 +465,15 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             return;
         }
 
-        customer.setPassword(newPassword);
-        System.out.println("Password updated successfully!");
-        logger.writeLog(customer.getUsername(), "Changed password successfully.");
+        try {
+            customer.setPassword(newPassword);
+            dealership.saveUsersToCSV();
+            System.out.println("Password updated successfully!");
+            logger.writeLog(customer.getUsername(), "Changed password successfully.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+            logger.writeLog(customer.getUsername(), "Failed password change attempt: New password matches old password.");
+        }
     }
 
     /**
@@ -706,6 +712,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
                         // Re-indexing dealership map since the key changed
                         dealership.getUsers().remove(oldUsername);
                         dealership.getUsers().put(newUsername, targetUser);
+                        dealership.saveUsersToCSV();
 
                         System.out.println("Username updated successfully to: " + newUsername);
                         logger.writeLog(admin.getUsername(), "Updated username from " + oldUsername + " to " + newUsername);
