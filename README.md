@@ -16,8 +16,9 @@ Console-based Object-Oriented Java application developed as a term project for *
 ## Key Features
 
 ### 1. Role-specific functions
-* **Customer**: Register new accounts, deposit initial funds, browse inventory, filter vehicles, manage profile attributes, and purchase cars.
-* **Administrator**: 
+* **User**: Register an account 
+* **Customer**: Deposit initial funds, browse inventory, filter vehicles, manage profile attributes, and purchase cars.
+* **Admin**: 
   * **Manage Users**: Add new users (Customers or Admins), view all registered members, update profile details (name, unique username validation, password), and delete user accounts.
   * **Manage Cars**: Add new vehicle types (Sedan, SUV, Hatchback, Pickup), view/search the complete inventory, update car prices or available stock, and delete vehicles.
   * **View Dealership Revenue**: Track earnings generated through vehicle sales.
