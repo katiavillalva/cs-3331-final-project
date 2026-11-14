@@ -12,11 +12,17 @@ import java.time.format.DateTimeFormatter;
  * @since November 10, 2026
  */
 public class Log {
-    private String logFileName;
+    private final String logFileName;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss MM/dd/yy");
 
     public Log(String logFileName) {
         this.logFileName = logFileName;
+    }
+
+
+    /* Returns the name of the log file. */
+    public String getLogFileName() {
+        return logFileName;
     }
 
     /**
