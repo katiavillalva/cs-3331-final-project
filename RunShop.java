@@ -24,7 +24,7 @@ public class RunShop {
      */
     public static void main(String[] args) {
         try {
-            System.out.println("Starting Miner Cars Dealership System...");
+            System.out.println("Starting " + dealership.getName() + " System..");
             
             dealership.loadUsers();
             dealership.loadCars();
@@ -42,7 +42,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
     System.out.println("Saving system data...");
     dealership.saveUsersToCSV();
     dealership.saveCarsToCSV();
-    System.out.println("Exiting system. Thank you for visiting Miner Cars!");
+    System.out.println("Exiting system. Thank you for visiting" + dealership.getName() + "!");
     logger.writeLog("System", "Exited application.");
     break;
 }
