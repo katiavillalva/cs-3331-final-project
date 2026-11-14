@@ -53,6 +53,6 @@ Make sure you have **Java Development Kit (JDK)** installed on your system. Open
 ```bash
 javac *.java
 
-2. Run the application
+### 2. Run the application
 java RunShop.java
 
