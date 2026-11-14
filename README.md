@@ -41,7 +41,7 @@ Console-based Object-Oriented Java application developed as a term project for *
 * **CarDealership.java**: Constructs and modifies dealership objects with features such as name, list of Users, and revenue.
 * **User.java**: Abstract superclass modeling a general user in the system. Has Admin and Customer as concrete subclasses. 
 * **Car.java**: Abstract superclass modeling a car object with attributes such as make, color, VIN, and price. 
-* **Log.java**: Timestamped logger storing writing user actions in a .txt file. 
+* **Log.java**: Timestamped logger writing user actions in a .txt file. 
 
 ---
 
