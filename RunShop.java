@@ -88,6 +88,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         try {
             money = Double.parseDouble(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
+            System.out.println("Invalid money format. Defaulting to $0.00.");
             money = 0.0;
         }
 
@@ -316,7 +317,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
 
         if (success) {
             // Updating dealership revenue and car inventory stock
-            dealership.updateRevenue(targetCar.getPrice());
+            dealership.updateRevenue(targetCar.getPrice()*(customer.getIsMember() ? (1 - customer.MEMBERSHIP_DISCOUNT) : 1)); // Apply membership discount if applicable
             targetCar.setCarsAvailable(targetCar.getCarsAvailable() - 1);
 
             System.out.println("\nCongratulations! Purchase successful!");
