@@ -3,13 +3,14 @@
  * and opt for a Miner Cars membership. Extends the abstract class {@link User}.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 1.0
- * @since November 10, 2026
+ * @version 2.0
+ * @since November 14, 2026
  */
 public class Customer extends User {
     private int numCarsPurchased = 0;
     private double moneyAvailable = 0.0;
     private boolean isMember = false;
+    public final double MEMBERSHIP_DISCOUNT = 0.10;  
 
     /**
      * Constructs a new Customer with the specified personal and login details.
@@ -74,11 +75,14 @@ public class Customer extends User {
      * @param amountIn the amount to add (can be negative to deduct from the available money)
      * @throws IllegalArgumentException if the resulting balance drops below zero
      */
-    public void updateMoneyAvailable(double amountIn) {
+    public boolean updateMoneyAvailable(double amountIn) {
         if (this.moneyAvailable + amountIn < 0) {
-            throw new IllegalArgumentException("Insufficient funds. Cannot deduct more than the available balance.");
+            System.out.println("Insufficient funds. Cannot deduct $" + (-amountIn) + " from available money.");
+            System.out.println("Current available money: $" + this.moneyAvailable);
+            return false; // Insufficient funds, cannot deduct
         } 
         this.moneyAvailable += amountIn;
+        return true;
     }
 
 /**
@@ -93,14 +97,15 @@ public class Customer extends User {
         if (carIn == null) {
             return false;
         }
-        
-        if (this.moneyAvailable >= carIn.getPrice()) {
-            this.moneyAvailable -= carIn.getPrice();
-            this.numCarsPurchased++;
-            return true;
+        double price = carIn.getPrice();
+        if (this.isMember) {
+            price -= price * MEMBERSHIP_DISCOUNT; // Apply membership discount
         }
-        
-        return false;
+        if (this.updateMoneyAvailable(-price) == false) {
+            return false; // Insufficient funds, cannot purchase
+        }
+        this.numCarsPurchased++; // Increment the number of cars purchased
+        return true;
     }
 
     /**
