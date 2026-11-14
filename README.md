@@ -1,8 +1,6 @@
 # cs-3331-final-project
 Final project for CS-3331 Advanced Objected Oriented Programming, Fall 2026. 
 
-Final project for CS-3331 Advanced Objected Oriented Programming, Fall 2026. 
-
 # Miner Cars Dealership System
 
 Console-based Object-Oriented Java application developed as a term project for **CS 3331 (Advanced Object-Oriented Programming)**. The system simulates a comprehensive car dealership management platform supporting multi-role authentication (Administrators and Customers), real-time inventory management, advanced searching/filtering, user profile management, secure purchasing workflows, and automated activity logging.
