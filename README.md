@@ -29,7 +29,7 @@ Console-based Object-Oriented Java application developed as a term project for *
 
 ### 3. Data Persistence & Logging
 * **CSV-based Storage**: Automatically loads and synchronizes data from user_data.csv and car_data.csv and stores new Users and Cars added during the session. 
-* **Activity Audit Log (`log.txt`)**: Records timestamped user actions (logins, inventory views, filters, purchases, etc.)
+* **Activity Log (log.txt)**: Records timestamped user actions (logins, inventory views, filters, purchases, etc.)
 
 ---
 
