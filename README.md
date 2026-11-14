@@ -25,11 +25,11 @@ Console-based Object-Oriented Java application developed as a term project for *
 
 ### 2. Vehicle Inventory & Filtering
 * Vehicle subclasses are referenced by the Car supertype to store all cars in one inventory list. The inventory can be filtered by multiple criteria:  
-  * Filter by **ID**, **Car Type**, **Condition** (New/Used), and **Price Range ($\pm\$5,000$)**.
+  * Filter by ID, Car Type, Condition (New/Used), and Price.
   * Dynamic stock management ensuring vehicles are only purchased if available and car counts are updated after a purchase is made. 
 
 ### 3. Data Persistence & Logging
-* **CSV-based Storage**: Automatically loads and synchronizes data from user_data.csv and car_data.csv and stores new Users and Cars added during the session. 
+* **CSV-based Storage**: Automatically loads and synchronizes data from user_data.csv and car_data.csv and writes new Users and Cars added during the session. 
 * **Activity Log (log.txt)**: Records timestamped user actions (logins, inventory views, filters, purchases, etc.)
 
 ---
