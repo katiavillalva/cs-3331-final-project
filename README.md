@@ -19,7 +19,7 @@ Console-based Object-Oriented Java application developed as a term project for *
 * **Customer**: Register new accounts, deposit initial funds, browse inventory, filter vehicles, manage profile attributes, and purchase cars.
 * **Administrator**: 
   * **Manage Users**: Add new users (Customers or Admins), view all registered members, update profile details (name, unique username validation, password), and delete user accounts.
-  * **Manage Cars**: Add new vehicle types (`Sedan`, `SUV`, `Hatchback`, `Pickup`), view/search the complete inventory, update car prices or available stock, and delete vehicles.
+  * **Manage Cars**: Add new vehicle types (Sedan, SUV, Hatchback, Pickup), view/search the complete inventory, update car prices or available stock, and delete vehicles.
   * **View Dealership Revenue**: Track earnings generated through vehicle sales.
 
 ### 2. Vehicle Inventory & Filtering
@@ -35,12 +35,12 @@ Console-based Object-Oriented Java application developed as a term project for *
 
 ## Class Structure
 
-* **`RunShop.java`**: Main user interface controller coordinating console input/output and session flow. Handles registering, logging in, and Customer/Admin specific functions. 
-* **`Menu.java`**: Constructs menus with options and implements displaying functionality.
-* **`CarDealership.java`**: Constructs and modifies dealership objects with features such as name, list of Users, and revenue.
-* **`User.java**: Abstract superclass modeling a general user in the system. Has Admin and Customer as concrete subclasses. 
-* **`Car.java**: Abstract superclass modeling a car object with attributes such as make, color, VIN, and price. 
-* **`Log.java`**: Timestamped logger storing writing user actions in a .txt file. 
+* **RunShop.java**: Main user interface controller coordinating console input/output and session flow. Handles registering, logging in, and Customer/Admin specific functions. 
+* **Menu.java**: Constructs menus with options and implements displaying functionality.
+* **CarDealership.java**: Constructs and modifies dealership objects with features such as name, list of Users, and revenue.
+* **User.java**: Abstract superclass modeling a general user in the system. Has Admin and Customer as concrete subclasses. 
+* **Car.java**: Abstract superclass modeling a car object with attributes such as make, color, VIN, and price. 
+* **Log.java**: Timestamped logger storing writing user actions in a .txt file. 
 
 ---
 
@@ -53,5 +53,5 @@ Make sure you have **Java Development Kit (JDK)** installed on your system. Open
 javac *.java
 
 2. Run the application
-java RunShop
+java RunShop.java
 
