@@ -12,6 +12,9 @@ import java.util.Scanner;
 public class RunShop {
     private static Log logger = new Log("log.txt");
     private static CarDealership dealership = new CarDealership("Miner Cars Dealership");
+    private static Menu mainMenu = new Menu(List.of("Register", "Login", "Exit"), dealership.getName() + " - MAIN MENU");
+    private static Menu adminMenu = new Menu(List.of("Manage Users", "View Inventory", "View Revenue", "Logout"), "ADMINISTRATOR MENU");
+    private static Menu customerMenu = new Menu(List.of("Manage Profile", "Browse Cars", "Logout"), "CUSTOMER MENU");
 
     /**
      * Main execution method. Initializes dealership data, runs the main application loop, 
@@ -29,9 +32,6 @@ public class RunShop {
 
             Scanner scanner = new Scanner(System.in);
             boolean running = true;
-
-            List<String> mainOptions = List.of("Register", "Login", "Exit");
-            Menu mainMenu = new Menu(mainOptions);
 
             while (running) {
                 mainMenu.displayOptions();
@@ -150,14 +150,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
     private static void runCustomerMenu(Scanner scanner, Customer customer) {
         boolean sessionActive = true;
         while (sessionActive) {
-            System.out.println("\n========================================");
-            System.out.println("             CUSTOMER MENU              ");
-            System.out.println("========================================");
-            System.out.println("1. Manage Profile");
-            System.out.println("2. Browse Cars (View, Filter, Purchase)");
-            System.out.println("3. Logout");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            customerMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             if (opt.equals("3") || opt.equalsIgnoreCase("Logout")) {
