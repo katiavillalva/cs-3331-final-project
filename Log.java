@@ -8,8 +8,8 @@ import java.time.format.DateTimeFormatter;
  * Handles system logging operations with precise timestamp formatting.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 2.1
- * @since November 10, 2026
+ * @version 2.2
+ * @since November 14, 2026
  */
 public class Log {
     private final String logFileName;
@@ -26,7 +26,7 @@ public class Log {
     }
 
     /**
-     * Writes a structured log entry to the log file.
+     * Wgrites a structured log entry to the log file.
      * 
      * @param username the user performing the action
      * @param action   description of the action
