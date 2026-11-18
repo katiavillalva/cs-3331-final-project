@@ -5,21 +5,20 @@ import java.util.Set;
  * Extends the abstract class {@link Person} and serves as the superclass for Customer and Admin.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 1.0
- * @since November 10, 2026
+ * @version 2.0
+ * @since November 17, 2026
  */
 public abstract class User extends Person {
-    private final int userID;
-    private final String userType;
-    private String username;
-    private String password;
+    protected final int userID;
+    protected final String userType;
+    protected String username;
+    protected String password;
 
     /**
      * Constructs a new User with the specified details.
      * 
      * @param firstName the user's first name
      * @param lastName  the user's last name
-     * @param userID    the user's unique read-only ID
      * @param userType  the type of user (e.g., "Customer" or "Admin")
      * @param username  the user's unique username
      * @param password  the user's password
@@ -77,18 +76,18 @@ public abstract class User extends Person {
     /** @return the user's password */
     public String getPassword() { return this.password; }
 
-    // ==================== Display Methods ====================
+    // ==================== toString method ====================
 
-    /**
-     * Displays all User and Person attribute values in a formatted console block.
+    @Override
+     /** Overridden toString method 
+     * @return String containing all user information except the password
      */
-    public void displayProfile() {
-        System.out.println("----------- User Profile: -----------");
-        System.out.println("Name: " + this.getFirstName() + " " + this.getLastName());
-        System.out.println("User Type: " + this.userType);
-        System.out.println("User ID: " + this.userID);
-        System.out.println("Username: " + this.getUsername());
-        System.out.println("Password: " + this.getPassword());
-        System.out.println("-------------------------------------");
+    public String toString() {
+        return "----------- User Profile: -----------\n"
+            + "Name: " + this.getFirstName() + " " + this.getLastName() + "\n"
+            + "User Type: " + this.userType + "\n"
+            + "User ID: " + this.userID + "\n"
+            + "Username: " + this.getUsername() + "\n"
+            + "-------------------------------------";
     }
 }

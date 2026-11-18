@@ -7,8 +7,8 @@
  * @since November 10, 2026
  */
 public abstract class Person {
-    private String firstName; 
-    private String lastName;
+    protected String firstName; 
+    protected String lastName;
 
     /**
      * Constructs a new Person with the specified first name and last name.

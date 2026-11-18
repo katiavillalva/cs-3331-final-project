@@ -14,7 +14,7 @@ public class Customer extends User {
 
     /**
      * Constructs a new Customer with the specified personal and login details.
-     * Automatically sets the user type to "Customer".
+     * Automatically sets the user type to "customer".
      * 
      * @param firstName the customer's first name
      * @param lastName  the customer's last name
@@ -23,7 +23,7 @@ public class Customer extends User {
      * @param password  the customer's password
      */
     public Customer(String firstName, String lastName, int userID, String username, String password) {
-        super(firstName, lastName, userID, "Customer", username, password);
+        super(firstName, lastName, userID, "customer", username, password);
     }
 
     // ==================== Setters ====================
@@ -108,22 +108,13 @@ public class Customer extends User {
         return true;
     }
 
-    /**
-     * Displays the complete profile information of the customer, 
-     * including ID, name, credentials, balance, cars purchased, 
-     * membership status, and user type.
+    /** Overridden toString method 
+     * @return String containing all profile information except the password
      */
     @Override
-    public void displayProfile() {
-        System.out.println("\n--- CUSTOMER PROFILE ---");
-        System.out.println("User ID: " + getUserID());
-        System.out.println("First Name: " + getFirstName());
-        System.out.println("Last Name: " + getLastName());
-        System.out.println("Username: " + getUsername());
-        System.out.println("Password: " + getPassword());
-        System.out.println("Money Available: $" + getMoneyAvailable());
-        System.out.println("Cars Purchased: " + getNumCarsPurchased());
-        System.out.println("MinerCars Membership: " + getIsMember());
-        System.out.println("User Type: " + getUserType());
+    public String toString() {
+        return String.format("%-5d %-15s %-15s %-15s $%-12.2f %-8b %-8s",
+                        this.userID, this.firstName, this.lastName, this.username,
+                        this.moneyAvailable, this.isMember, this.userType);
     }
 }

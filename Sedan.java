@@ -1,6 +1,6 @@
 /**
- * Represents a Sedan vehicle in the Miner Cars Dealership system.
- * Extends the abstract class {@link Car} and provides specific implementations 
+ * Represents a Sedan vehicle. 
+ * Extends the abstract class Car and provides methods unique to the subclass.
  * for sedan characteristics.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva

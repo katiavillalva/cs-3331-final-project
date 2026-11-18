@@ -3,20 +3,35 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Represents a car dealership managing inventory, users, and financial revenue.
  * Handles data loading from CSV files, user/car management, and search operations.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 2.1
- * @since November 10, 2026
+ * @version 3.0
+ * @since November 17, 2026
  */
 public class CarDealership {
+    /** The business name of the car dealership */
     private String name;
+
+    /** The list containing all cars in the dealership's inventory */
     private ArrayList<Car> inventory = new ArrayList<>();
+
+    /** Map of Users by their unique username */
     private Map<String, User> users = new HashMap<>();
+
+    /** Total revenue made from car */
     private double revenue = 0.0;
+
+    /** Car factory object which create Car subclass objects  */
+    private CarFactory carFactory = new CarFactory();
+
+    /** Car factory object which create Car subclass objects  */
+    private UserFactory userFactory = new UserFactory();
 
     /**
      * Constructs a new CarDealership with the specified name. 
@@ -28,7 +43,7 @@ public class CarDealership {
         this.name = name;
     }
 
-    // ==================== Setters & Getters ====================
+    // ==================== Setters ====================
 
     /**
      * Sets the name of the dealership.
@@ -39,6 +54,7 @@ public class CarDealership {
         this.name = name; 
     }
 
+    // ==================== Getters ====================
     /**
      * Returns the name of the dealership.
      * 
@@ -75,11 +91,10 @@ public class CarDealership {
         return revenue; 
     }
 
-    // ==================== Core Methods ====================
+    // ================================================
 
     /**
      * Adds a car to the dealership's inventory list. 
-     * 
      * @param car the Car object to add
      */
     public void addCar(Car car) {
@@ -88,7 +103,6 @@ public class CarDealership {
 
     /**
      * Adds a user to the dealership's map of users using their username as the key. 
-     * 
      * @param user the User object to add
      */
     public void addUser(User user) {
@@ -110,13 +124,21 @@ public class CarDealership {
     }
 
     /**
+     * Displays the information of each car in the given list.
+     * @param cars the list of cars to display
+     */
+    public void displayCars(List<Car> cars) {
+        for (Car car : cars) {
+            System.out.println(car.toString());
+        }
+    }
+
+    /**
      * Displays the dealership name and the information of all cars in the inventory, regardless of availability. 
      */
     public void displayAllCars() {
         System.out.println(this.name + " Inventory:");
-        for (Car car : this.inventory) {
-            car.displayInformation();
-        }
+        displayCars(this.inventory);
     }
  
     /**
@@ -126,46 +148,33 @@ public class CarDealership {
         System.out.println(this.name + " Available Cars:");
         for (Car car : this.inventory) {
             if (car.getCarsAvailable() > 0) {
-                car.displayInformation();
+                System.out.println(car.toString());;
             }
         }
     }
 
-    /**
-     * Displays the information of available cars that match the specified search criterion 
-     * (ID, car type, condition, or a price range within +/- $5,000).
-     * 
-     * @param idIn        the car ID inputted by the user (-1 to ignore)
-     * @param carTypeIn   the car type inputted by the user (null to ignore)
-     * @param conditionIn the condition inputted by the user (null to ignore)
-     * @param priceIn     the target price inputted by the user (-1 to ignore)
-     */
-    public void filterCars(int idIn, String carTypeIn, String conditionIn, double priceIn) {
-        System.out.println("\n--- SEARCH RESULTS ---");
-        boolean found = false;
-        
+   /** Filters the cars in the inventory by the inpututed ID, type, condition, or price within a range
+    * @param idIn         the car ID 
+    * @param carTypeIn    the car type 
+    * @param conditionIn  the condition 
+    * @param priceIn      the target price 
+    * @param priceRangeIn the amount to add and subtract from the price to get the price range
+    * @return             the list of Cars that were found with the criteria (empty if no cars were found)
+    */
+    public List<Car> filterCars(int idIn, String carTypeIn, String conditionIn, double priceIn, double priceRangeIn) {
+        List<Car> result = new ArrayList<>();
         for (Car car : this.inventory) {
-            boolean matchesId = (idIn == -1 || car.getId() == idIn);
-            boolean matchesType = (carTypeIn == null || car.getCarType().equalsIgnoreCase(carTypeIn));
-            boolean matchesCondition = (conditionIn == null || car.getCondition().equalsIgnoreCase(conditionIn));
-            boolean matchesPrice = (priceIn == -1.0 || (car.getPrice() >= priceIn - 5000.0 && car.getPrice() <= priceIn + 5000.0));
-
-            if (car.getCarsAvailable() > 0) {
-                if ((idIn != -1 && matchesId) || 
-                    (carTypeIn != null && matchesType) || 
-                    (conditionIn != null && matchesCondition) || 
-                    (priceIn != -1.0 && matchesPrice)) {
-                    
-                    car.displayInformation();
-                    found = true;
-                }
+            if ((idIn == 0 || car.getId() == idIn) &&
+                (carTypeIn == null || car.getCarType().equalsIgnoreCase(carTypeIn)) &&
+                (conditionIn == null || car.getCondition().equalsIgnoreCase(conditionIn)) &&
+                (priceIn == 0 || (car.getPrice() >= priceIn - priceRangeIn && car.getPrice() <= priceIn + priceRangeIn)) &&
+                (car.getCarsAvailable() > 0)){
+                    result.add(car);
             }
         }
-
-        if (!found) {
-            System.out.println("Information: The car matching your criteria was not found in the available inventory.");
-        }
+        return result;
     }
+    
 
     /**
      * Loads car inventory data from 'car_data.csv' with safe parsing for empty cells.
@@ -197,17 +206,7 @@ public class CarDealership {
                         double price = data[10].trim().isEmpty() ? 0.0 : Double.parseDouble(data[10].trim());
                         int carsAvailable = data[11].trim().isEmpty() ? 0 : Integer.parseInt(data[11].trim());
 
-                        Car car = null;
-                        if (carType.equalsIgnoreCase("Sedan")) {
-                            car = new Sedan(id, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-                        } else if (carType.equalsIgnoreCase("SUV")) {
-                            car = new SUV(id, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-                        } else if (carType.equalsIgnoreCase("Hatchback")) {
-                            car = new Hatchback(id, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-                        } else if (carType.equalsIgnoreCase("Pickup")) {
-                            car = new Pickup(id, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-                        }
-
+                        Car car = carFactory.createCar(id, carType, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
                         if (car != null) {
                             this.inventory.add(car);
                         }
@@ -247,14 +246,9 @@ public class CarDealership {
                         String password = data[7].trim();
                         String userType = data[8].trim();
 
-                        if (userType.equalsIgnoreCase("Admin")) {
-                            Admin admin = new Admin(firstName, lastName, userID, username, password);
-                            addUser(admin);
-                        } else if (userType.equalsIgnoreCase("Customer")) {
-                            Customer customer = new Customer(firstName, lastName, userID, username, password);
-                            customer.updateMoneyAvailable(moneyAvailable);
-                            customer.setIsMember(isMember);
-                            addUser(customer);
+                        User user = userFactory.createUser(userID, firstName, lastName, username, password, userType, moneyAvailable, isMember);
+                        if (user != null) {
+                            addUser(user);
                         }
                     } catch (NumberFormatException e) {
                         // Skip malformed rows safely
@@ -267,23 +261,10 @@ public class CarDealership {
     }
 
     /**
-     * Registers a new customer by generating a unique ID, initializing their account attributes,
-     * adding them to the user map, and persisting the record to 'user_data.csv'.
-     * 
-     * @param firstName      the customer's first name
-     * @param lastName       the customer's last name
-     * @param username       the unique username for login
-     * @param password       the account password
-     * @param moneyAvailable the initial money deposit
-     * @return true if registration was successful, false if username already exists or error occurs
-     */
-    public boolean registerCustomer(String firstName, String lastName, String username, String password, double moneyAvailable) {
-        return registerUser(firstName, lastName, username, password, "Customer", moneyAvailable);
-    }
 
     /**
      * Registers a new user (Customer or Admin) by generating a unique ID, initializing their attributes,
-     * adding them to the user map, and persisting the record to 'user_data.csv'.
+     * adding them to the user map, and writing the user information to 'user_data.csv'.
      * 
      * @param firstName      the user's first name
      * @param lastName       the user's last name
@@ -293,35 +274,21 @@ public class CarDealership {
      * @param moneyAvailable initial deposit (applicable only for Customers)
      * @return true if registration was successful, false if username already exists or error occurs
      */
-    public boolean registerUser(String firstName, String lastName, String username, String password, String userType, double moneyAvailable) {
-        if (this.users.containsKey(username)) {
+    public boolean registerUser(String firstName, String lastName, String username, String password, String userType, double moneyAvailable, boolean isMember) {
+        if (firstName.isEmpty() || lastName.isEmpty() || username.isEmpty() || password.isEmpty() || moneyAvailable < 0) {
+            return false;
+        } if (this.users.containsKey(username)) {
             return false;
         }
+        int newId = 0;
+        for (User u : this.users.values()) newId = Math.max(newId, u.getUserID() + 1);  // Get a unique user ID
 
-        int newId = this.users.size() + 1001;
-        String csvLine = "";
-
-        if (userType.equalsIgnoreCase("Admin")) {
-            Admin newAdmin = new Admin(firstName, lastName, newId, username, password);
-            addUser(newAdmin);
-            csvLine = String.format("%d,%s,%s,,,,,%s,%s,Admin\n", newId, firstName, lastName, username, password);
-        } else if (userType.equalsIgnoreCase("Customer")) {
-            Customer newCustomer = new Customer(firstName, lastName, newId, username, password);
-            newCustomer.updateMoneyAvailable(moneyAvailable);
-            newCustomer.setIsMember(false);
-            addUser(newCustomer);
-            csvLine = String.format("%d,%s,%s,%.2f,,%b,%s,%s,Customer\n", newId, firstName, lastName, moneyAvailable, false, username, password);
-        } else {
-            return false;
+        User newUser = userFactory.createUser(newId, firstName, lastName, username, password, userType, moneyAvailable, isMember);
+        if (newUser == null) {
+            return false;   // unrecognized user type
         }
-
-        try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter("user_data.csv", true))) {
-            bw.write(csvLine);
-            return true;
-        } catch (java.io.IOException e) {
-            System.out.println("Warning: Could not save to user_data.csv file: " + e.getMessage());
-            return false;
-        }
+        addUser(newUser);
+        return saveUsersToCSV();
     }
 
     /**
@@ -336,7 +303,7 @@ public class CarDealership {
             return;
         }
         for (User user : this.users.values()) {
-            user.displayProfile();
+            System.out.println(user.toString());
         }
         System.out.println("========================================");
     }
@@ -366,7 +333,7 @@ public class CarDealership {
                                   user.getLastName().toLowerCase().contains(query);
 
             if (matchesId || matchesUsername || matchesName) {
-                user.displayProfile();
+                System.out.println(user.toString());
                 found = true;
             }
         }
@@ -434,11 +401,11 @@ public class CarDealership {
                 String line = "";
                 if (user instanceof Admin) {
                     Admin admin = (Admin) user;
-                    line = String.format("%d,%s,%s,,,,,%s,%s,Admin\n", 
+                    line = String.format("%d,%s,%s,,,,%s,%s,Admin\n", 
                         admin.getUserID(), admin.getFirstName(), admin.getLastName(), admin.getUsername(), admin.getPassword());
                 } else if (user instanceof Customer) {
                     Customer cust = (Customer) user;
-                    line = String.format("%d,%s,%s,%.2f,,%b,%s,%s,Customer\n", 
+                    line = String.format(Locale.US, "%d,%s,%s,%.2f,,%b,%s,%s,Customer\n", 
                         cust.getUserID(), cust.getFirstName(), cust.getLastName(), 
                         cust.getMoneyAvailable(), cust.getIsMember(), cust.getUsername(), cust.getPassword());
                 }
@@ -478,19 +445,10 @@ public class CarDealership {
             }
         }
 
-        Car newCar = null;
-        if (carType.equalsIgnoreCase("Sedan")) {
-            newCar = new Sedan(newId, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-        } else if (carType.equalsIgnoreCase("SUV")) {
-            newCar = new SUV(newId, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-        } else if (carType.equalsIgnoreCase("Hatchback")) {
-            newCar = new Hatchback(newId, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-        } else if (carType.equalsIgnoreCase("Pickup")) {
-            newCar = new Pickup(newId, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
-        } else {
+        Car newCar = carFactory.createCar(newId, carType, model, condition, price, color, capacity, mileage, transmission, fuelType, VIN, carsAvailable);
+        if (newCar == null) {
             return false;
         }
-
         this.inventory.add(newCar);
         return saveCarsToCSV();
     }
@@ -546,7 +504,7 @@ public class CarDealership {
             boolean matchesModel = car.getModel().toLowerCase().contains(query);
 
             if (matchesId || matchesType || matchesModel) {
-                car.displayInformation();
+                System.out.println(car.toString());;
                 found = true;
             }
         }
@@ -582,7 +540,7 @@ public class CarDealership {
             bw.write("ID,CarType,Model,Condition,Color,Capacity,Mileage,FuelType,Transmission,VIN,Price,CarsAvailable\n");
 
             for (Car car : this.inventory) {
-                String line = String.format("%d,%s,%s,%s,%s,%d,%d,%s,%s,%s,%.2f,%d\n",
+                String line = String.format(Locale.US, "%d,%s,%s,%s,%s,%d,%d,%s,%s,%s,%.2f,%d\n",
                     car.getId(),
                     car.getCarType(),
                     car.getModel(),

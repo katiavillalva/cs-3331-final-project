@@ -1,11 +1,10 @@
 /**
- * Represents a Pickup truck in the Miner Cars Dealership system.
- * Extends the abstract class {@link Car} and provides specific implementations 
- * for pickup truck characteristics.
+ * Represents a Pickup vehicle. 
+ * Extends the abstract class Car and provides methods unique to the subclass.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 1.0
- * @since November 10, 2026
+ * @version 1.1
+ * @since November 17, 2026
  */
 public class Pickup extends Car {
 

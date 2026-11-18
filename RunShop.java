@@ -1,25 +1,26 @@
 import java.util.List;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /**
- * Main application class for the Miner Cars Dealership system.
- * Acts solely as the user interface controller.
+ * Driver class for the dealership system. Handles inputs and overall flow of the system.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 2.1
- * @since November 10, 2026
+ * @version 3.0
+ * @since November 17, 2026
  */
 public class RunShop {
     private static Log logger = new Log("log.txt");
     private static CarDealership dealership = new CarDealership("Miner Cars Dealership");
+    private static UserAuthenticator authorizer = new UserAuthenticator(dealership);
     private static Menu mainMenu = new Menu(List.of("Register", "Login", "Exit"), dealership.getName() + " - MAIN MENU");
-    private static Menu adminMenu = new Menu(List.of("Manage Users", "View Inventory", "View Revenue", "Logout"), "ADMINISTRATOR MENU");
+    private static Menu adminMenu = new Menu(List.of("Manage Users", "Manage Cars", "View Inventory", "Get Revenue", "Logout"), "ADMINISTRATOR MENU");
     private static Menu customerMenu = new Menu(List.of("Manage Profile", "Browse Cars", "Logout"), "CUSTOMER MENU");
+    private static User currentUser;
 
     /**
-     * Main execution method. Initializes dealership data, runs the main application loop, 
-     * and handles exit protocols.
-     * 
+     * Main method which initializes the dealership, runs the main application loop, and calls methods to handles user interaction with 
+     * the system.
      * @param args command line arguments
      */
     public static void main(String[] args) {
@@ -37,16 +38,15 @@ public class RunShop {
                 mainMenu.displayOptions();
                 String input = scanner.nextLine().trim();
 
-if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
-    running = false;
-    System.out.println("Saving system data...");
-    dealership.saveUsersToCSV();
-    dealership.saveCarsToCSV();
-    System.out.println("Exiting system. Thank you for visiting" + dealership.getName() + "!");
-    logger.writeLog("System", "Exited application.");
-    break;
-}
-
+                if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
+                    running = false;
+                    System.out.println("Saving system data...");
+                    dealership.saveUsersToCSV();
+                    dealership.saveCarsToCSV();
+                    System.out.println("Exiting system. Thank you for visiting " + dealership.getName() + "!");
+                    logger.writeLog("System", "Exited application.");
+                    break;
+                }
                 switch (input) {
                     case "1":
                         handleRegister(scanner);
@@ -60,48 +60,18 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             }
             scanner.close();
         } catch (Throwable t) {
-            System.out.println("Ocurrió un error crítico al iniciar el sistema:");
+            System.out.println("A critical error occured, exiting the system.");
             t.printStackTrace();
         }
-
-        
     }
 
 /**
-     * Handles the user registration workflow by collecting input from the console 
-     * and delegating the registration logic to the CarDealership class.
+     * Handles user registration by a user who is not an admin by using the UserRegister class 
      * 
      * @param scanner active console scanner
      */
     private static void handleRegister(Scanner scanner) {
-        System.out.println("\n--- NEW USER REGISTRATION ---");
-        System.out.print("Enter first name: ");
-        String firstName = scanner.nextLine().trim();
-        System.out.print("Enter last name: ");
-        String lastName = scanner.nextLine().trim();
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine().trim();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine().trim();
-        System.out.print("Enter initial money available ($): ");
-        double money = 0.0;
-        try {
-            money = Double.parseDouble(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid money format. Defaulting to $0.00.");
-            money = 0.0;
-        }
-
-        // Delegating entirely to CarDealership, keeping RunShop as a pure UI controller
-        boolean success = dealership.registerCustomer(firstName, lastName, username, password, money);
-
-        if (success) {
-            System.out.println("Registration successful! You can now log in.");
-            logger.writeLog(username, "Registered new customer account.");
-        } else {
-            System.out.println("Registration failed: Username may already exist or error occurred.");
-            logger.writeLog(username, "Failed registration attempt.");
-        }
+        new UserRegister(dealership, logger).register(scanner);
     }
 
     /**
@@ -110,21 +80,20 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * 
      * @param scanner active console scanner
      */
-    private static void handleLogin(Scanner scanner) {
-        System.out.println("\n--- SYSTEM LOGIN ---");
+    private static boolean handleLogin(Scanner scanner) {
+        System.out.println("\nLogin \n");
         System.out.print("Enter username: ");
-        String username = scanner.nextLine().trim();
+        String username = Validator.validateString(scanner.nextLine());
         System.out.print("Enter password: ");
         String password = scanner.nextLine().trim();
 
-        User authenticatedUser = dealership.getUsers().get(username);
+        User authenticatedUser = authorizer.authenticate(username, password);
 
-        if (authenticatedUser == null || !authenticatedUser.getPassword().equals(password)) {
+        if (authenticatedUser == null) {
             System.out.println("Invalid username or password. Please try again.");
-            logger.writeLog("Guest", "Failed login attempt for username: " + username);
-            return;
+            logger.writeLog("", "Failed login attempt for username: " + username);
+            return false;
         }
-
         System.out.println("\nLogin successful! Welcome back, " + authenticatedUser.getFirstName() + "!");
         logger.writeLog(username, "Successfully logged in.");
 
@@ -133,17 +102,11 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         } else if (authenticatedUser instanceof Customer) {
             runCustomerMenu(scanner, (Customer) authenticatedUser);
         }
+        return true;
     }
 
     /**
-     * Menu interface for authenticated customers.
-     * 
-     * @param scanner  active console scanner
-     * @param customer the currently logged-in Customer instance
-     */
-/**
-     * Menu interface for authenticated customers, structuring options according to 
-     * project requirements (Manage Profile, Browse Cars, Logout).
+     * Displays the customer menu and reads user input to allow the customer to interact with the menu.
      * 
      * @param scanner  active console scanner
      * @param customer the currently logged-in Customer instance
@@ -167,25 +130,17 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             }
         }
     }
-/**
-     * Sub-menu interface for browsing cars, filtering, and making purchases 
-     * (matching section 5.a.ii of the project requirements)[cite: 6, 7].
+    /**
+     * Interface for browsing cars, filtering, and making purchases 
      * 
      * @param scanner  active console scanner
      * @param customer the currently logged-in Customer instance
      */
     private static void runBrowseCarsMenu(Scanner scanner, Customer customer) {
         boolean browsing = true;
+        Menu browseCarsMenu = new Menu(List.of("Display All Available Cars", "Filter Cars", "Purchase a Car", "Back to Customer Menu"), "BROWSE CARS");
         while (browsing) {
-            System.out.println("\n========================================");
-            System.out.println("              BROWSE CARS               ");
-            System.out.println("========================================");
-            System.out.println("1. Display All Available Cars");
-            System.out.println("2. Filter Cars (Advanced Search)");
-            System.out.println("3. Purchase a Car");
-            System.out.println("4. Back to Customer Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            browseCarsMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -210,60 +165,61 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
     }
 
 /**
-     * Interactive sub-menu for advanced car filtering, allowing users to choose 
-     * specific search criteria (ID, Car Type, Condition, or Price range +/- $5,000).
+     * Reads valid user input (Car ID, type, condition, or price) )to call the car filter method from the CarDealership class  
      * 
      * @param scanner active console scanner
      */
     private static void handleFilterCars(Scanner scanner) {
-        boolean filtering = true;
-        while (filtering) {
-            System.out.println("\n========================================");
-            System.out.println("            ADVANCED CAR FILTER         ");
-            System.out.println("========================================");
-            System.out.println("1. Filter by Car ID");
-            System.out.println("2. Filter by Car Type (Sedan, SUV, etc.)");
-            System.out.println("3. Filter by Condition (New, Used)");
-            System.out.println("4. Filter by Price Range (+/- $5,000)");
-            System.out.println("5. Back to Browse Cars Menu");
-            System.out.println("========================================");
-            System.out.print("Please select a filter option: ");
-            String opt = scanner.nextLine().trim();
+        // Initialize the menu
+        double price_range = 5000.0;
+        List<String> options = List.of("Filter by Car ID",
+                                    "Filter by Car Type (Sedan, SUV, Hatchback, Pickup)",
+                                    "Filter by Condition (New, Used)",
+                                    "Filter by Price Range (+/- $" + (int) price_range + ")",
+                                    "Back to Browse Cars Menu");
+        Menu carFilterMenu = new Menu(options, "Filter Cars");
+        boolean running = true;
+        List<Car> result = new ArrayList<>();
+        while (running) {
+            carFilterMenu.displayOptions();
+            String input = scanner.nextLine().trim();
 
-            switch (opt) {
-                case "1":
-                    System.out.print("Enter Car ID: ");
-                    try {
-                        int idIn = Integer.parseInt(scanner.nextLine().trim());
-                        dealership.filterCars(idIn, null, null, -1.0);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid ID format. Search cancelled.");
-                    }
-                    break;
-                case "2":
-                    System.out.print("Enter Car Type (Sedan, SUV, Hatchback, Pickup): ");
-                    String typeIn = scanner.nextLine().trim();
-                    dealership.filterCars(-1, typeIn.isEmpty() ? null : typeIn, null, -1.0);
-                    break;
-                case "3":
-                    System.out.print("Enter Condition (New, Used): ");
-                    String condIn = scanner.nextLine().trim();
-                    dealership.filterCars(-1, null, condIn.isEmpty() ? null : condIn, -1.0);
-                    break;
-                case "4":
-                    System.out.print("Enter Target Price ($): ");
-                    try {
-                        double priceIn = Double.parseDouble(scanner.nextLine().trim());
-                        dealership.filterCars(-1, null, null, priceIn);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid price format. Search cancelled.");
-                    }
-                    break;
-                case "5":
-                    filtering = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+            try {
+                switch (input) {
+                    case "1":
+                        System.out.print("Enter Car ID: ");
+                        int idIn = Validator.validateWholeNumber(scanner.nextLine(), "ID");
+                        result = dealership.filterCars(idIn, null, null, 0, price_range);
+                        break;
+                    case "2":
+                        System.out.print("Enter Car Type (Sedan, SUV, Hatchback, Pickup): ");
+                        String typeIn = Validator.validateCarType(scanner.nextLine());
+                        result = dealership.filterCars(0, typeIn, null, 0, price_range);
+                        break;
+                    case "3":
+                        System.out.print("Enter Condition (New, Used): ");
+                        String condIn = Validator.validateCondition(scanner.nextLine());
+                        result = dealership.filterCars(0, null, condIn, 0, price_range);
+                        break;
+                    case "4":
+                        System.out.print("Enter Price ($): ");
+                        double priceIn = Validator.validatePrice(scanner.nextLine());
+                        result = dealership.filterCars(0, null, null, priceIn, price_range);
+                        System.out.println("\nprice within $" + price_range + " of $" + priceIn);
+                        break;
+                    case "5":
+                        running = false;
+                        break;
+                    default:
+                        System.out.println("Invalid option '" + input + "'. Please enter a number (1-" + carFilterMenu.getNumOptions()+ ").");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage() + " Stopping the search...");
+                running = false;
+            }
+            if (running && input.matches("[1-4]")) {
+                if (result.isEmpty()) System.out.println("No cars matched the criteria");
+            else { dealership.displayCars(result); result.clear(); }
             }
         }
     }
@@ -277,7 +233,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param customer the currently logged-in Customer instance
      */
     private static void handlePurchaseCar(Scanner scanner, Customer customer) {
-        System.out.println("\n--- PURCHASE A CAR ---");
+        System.out.println("\nPurchase a car\n");
         dealership.displayAvailableCars();
         
         System.out.print("\nEnter the ID of the car you wish to purchase (or 0 to cancel): ");
@@ -319,6 +275,8 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             // Updating dealership revenue and car inventory stock
             dealership.updateRevenue(targetCar.getPrice()*(customer.getIsMember() ? (1 - customer.MEMBERSHIP_DISCOUNT) : 1)); // Apply membership discount if applicable
             targetCar.setCarsAvailable(targetCar.getCarsAvailable() - 1);
+            dealership.saveUsersToCSV();
+            dealership.saveCarsToCSV();
 
             System.out.println("\nCongratulations! Purchase successful!");
             System.out.println("You bought the " + targetCar.getModel() + ".");
@@ -330,29 +288,21 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             logger.writeLog(customer.getUsername(), "Failed purchase attempt for car ID " + targetCar.getId() + " (Insufficient funds)");
         }
     }
-/**
+   /**
      * Manages the customer profile sub-menu (View Profile, Update Profile, Back).
-     * 
      * @param scanner  active console scanner
      * @param customer the currently logged-in Customer instance
      */
     private static void handleManageProfile(Scanner scanner, Customer customer) {
+        Menu manageProfileMenu = new Menu(List.of("View Profile", "Update Profile", "Back to Customer Menu"), "MANAGE PROFILE");
         boolean managing = true;
         while (managing) {
-            System.out.println("\n========================================");
-            System.out.println("             MANAGE PROFILE             ");
-            System.out.println("========================================");
-            System.out.println("1. View Profile");
-            System.out.println("2. Update Profile");
-            System.out.println("3. Back to Customer Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            manageProfileMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
                 case "1":
-                    // Delegating profile display to the Customer class (UML compliance)
-                    customer.displayProfile();
+                    System.out.println(customer.toString());
                     logger.writeLog(customer.getUsername(), "Viewed profile details.");
                     break;
                 case "2":
@@ -374,17 +324,10 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param customer the currently logged-in Customer instance
      */
     private static void handleUpdateProfile(Scanner scanner, Customer customer) {
+        Menu updateProfileMenu = new Menu(List.of("Change Username", "Change Password", "Update Money", "Back to Manage Profile"), "UPDATE PROFILE");
         boolean updating = true;
         while (updating) {
-            System.out.println("\n========================================");
-            System.out.println("             UPDATE PROFILE             ");
-            System.out.println("========================================");
-            System.out.println("1. Change Username");
-            System.out.println("2. Change Password");
-            System.out.println("3. Update Money");
-            System.out.println("4. Back to Manage Profile");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            updateProfileMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -414,7 +357,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param customer the currently logged-in Customer instance
      */
     private static void handleChangeUsername(Scanner scanner, Customer customer) {
-        System.out.println("\n--- CHANGE USERNAME ---");
+        System.out.println("\nChange username \n");
         System.out.print("Enter new username: ");
         String newUsername = scanner.nextLine().trim();
 
@@ -450,7 +393,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param customer the currently logged-in Customer instance
      */
     private static void handleChangePassword(Scanner scanner, Customer customer) {
-        System.out.println("\n--- CHANGE PASSWORD ---");
+        System.out.println("\nChange password \n");
         System.out.print("Enter new password: ");
         String newPassword = scanner.nextLine().trim();
 
@@ -458,7 +401,6 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             System.out.println("Password cannot be empty. Update cancelled.");
             return;
         }
-
         try {
             customer.setPassword(newPassword);
             dealership.saveUsersToCSV();
@@ -477,23 +419,20 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param customer the currently logged-in Customer instance
      */
     private static void handleUpdateMoney(Scanner scanner, Customer customer) {
-        System.out.println("\n--- UPDATE MONEY ---");
+        System.out.println("\nUpdate Money\n");
         System.out.print("Enter additional money to add ($): ");
         try {
-            double additionalMoney = Double.parseDouble(scanner.nextLine().trim());
-            if (additionalMoney < 0) {
-                System.out.println("Amount cannot be negative. Update cancelled.");
-                return;
-            }
-
-            double newTotal = customer.getMoneyAvailable() + additionalMoney;
-            customer.updateMoneyAvailable(newTotal);
+            double additionalMoney = Validator.validatePrice(scanner.nextLine());
+            customer.updateMoneyAvailable(additionalMoney);
+            dealership.saveUsersToCSV();   // persist the new balance
+            double newTotal = customer.getMoneyAvailable();
 
             System.out.println("Money updated successfully!");
             System.out.println("Added: $" + additionalMoney + " | New Total Balance: $" + newTotal);
             logger.writeLog(customer.getUsername(), "Added $" + additionalMoney + " to balance. New total: $" + newTotal);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number format. Update cancelled.");
+        } catch (IllegalArgumentException e) {
+            logger.writeLog(customer.getUsername(), "Failed attempt to update account balance.");
+            System.out.println(e.getMessage() + " Update cancelled.");
         }
     }
 
@@ -506,17 +445,9 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      */
     private static void runManageUsersMenu(Scanner scanner, Admin admin) {
         boolean managing = true;
+        Menu manageUsersMenu = new Menu(List.of("Add New User (Customer or Admin", "View All Members", "Update Member","Delete Member", "Back to Administrator Menu"), "MANAGE USERS");
         while (managing) {
-            System.out.println("\n========================================");
-            System.out.println("             MANAGE USERS               ");
-            System.out.println("========================================");
-            System.out.println("1. Add New User (Customer or Admin)");
-            System.out.println("2. View Members");
-            System.out.println("3. Update Member");
-            System.out.println("4. Delete Member");
-            System.out.println("5. Back to Administrator Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            manageUsersMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -549,43 +480,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param admin   the currently logged-in Admin instance
      */
     private static void handleAdminAddUser(Scanner scanner, Admin admin) {
-        System.out.println("\n--- ADD NEW USER ---");
-        System.out.print("Enter user type (Customer / Admin): ");
-        String userType = scanner.nextLine().trim();
-
-        if (!userType.equalsIgnoreCase("Customer") && !userType.equalsIgnoreCase("Admin")) {
-            System.out.println("Invalid user type. Operation cancelled.");
-            return;
-        }
-
-        System.out.print("Enter first name: ");
-        String firstName = scanner.nextLine().trim();
-        System.out.print("Enter last name: ");
-        String lastName = scanner.nextLine().trim();
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine().trim();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine().trim();
-
-        double money = 0.0;
-        if (userType.equalsIgnoreCase("Customer")) {
-            System.out.print("Enter initial money available ($): ");
-            try {
-                money = Double.parseDouble(scanner.nextLine().trim());
-            } catch (NumberFormatException e) {
-                money = 0.0;
-            }
-        }
-
-        boolean success = dealership.registerUser(firstName, lastName, username, password, userType, money);
-
-        if (success) {
-            System.out.println("New " + userType + " added successfully!");
-            logger.writeLog(admin.getUsername(), "Added new " + userType + " account: " + username);
-        } else {
-            System.out.println("Failed to add user: Username may already exist or invalid data.");
-            logger.writeLog(admin.getUsername(), "Failed attempt to add user: " + username);
-        }
+        new AdminRegister(dealership, logger, admin).register(scanner);
     }
 
     /**
@@ -596,15 +491,9 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      */
     private static void runViewMembersMenu(Scanner scanner, Admin admin) {
         boolean viewing = true;
+        Menu viewMembersMenu = new Menu(List.of("Display All Members", "Search for a Member (ID, Name, Username)", "Back to Manage Users Menu"), "VIEW MEMBERS");
         while (viewing) {
-            System.out.println("\n========================================");
-            System.out.println("              VIEW MEMBERS              ");
-            System.out.println("========================================");
-            System.out.println("1. Display All Members");
-            System.out.println("2. Search for a Member (ID, Name, Username)");
-            System.out.println("3. Back to Manage Users Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            viewMembersMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -639,7 +528,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param admin   the currently logged-in Admin instance
      */
     private static void handleAdminUpdateMember(Scanner scanner, Admin admin) {
-        System.out.println("\n--- UPDATE MEMBER PROFILE ---");
+        System.out.println("\nUpdate Member Profile\n");
         System.out.print("Enter ID, Name, or Username of the member to update: ");
         String query = scanner.nextLine().trim();
 
@@ -657,19 +546,11 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         }
 
         System.out.println("\nMember found:");
-        targetUser.displayProfile();
+        System.out.println(targetUser.toString());
+        Menu updateMemberMenu = new Menu(List.of("Change Name", "Change Username", "Change Password", "Back to Manage Users Menu"), "UPDATE MEMBER");
 
         boolean updatingMember = true;
         while (updatingMember) {
-            System.out.println("\n========================================");
-            System.out.println("           UPDATE MEMBER MENU           ");
-            System.out.println("========================================");
-            System.out.println("1. Change Name");
-            System.out.println("2. Change Username");
-            System.out.println("3. Change Password");
-            System.out.println("4. Back to Manage Users Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -719,9 +600,13 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
                     System.out.print("Enter new password: ");
                     String newPassword = scanner.nextLine().trim();
                     if (!newPassword.isEmpty()) {
-                        targetUser.setPassword(newPassword);
-                        System.out.println("Password updated successfully!");
-                        logger.writeLog(admin.getUsername(), "Updated password for user ID " + targetUser.getUserID());
+                        try {
+                            targetUser.setPassword(newPassword);
+                            System.out.println("Password updated successfully!");
+                            logger.writeLog(admin.getUsername(), "Updated password for user ID " + targetUser.getUserID());
+                        } catch (IllegalArgumentException e) {
+                            System.out.println(e.getMessage());
+                        }
                     } else {
                         System.out.println("Password cannot be empty.");
                     }
@@ -746,7 +631,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param admin   the currently logged-in Admin instance
      */
     private static void handleAdminDeleteMember(Scanner scanner, Admin admin) {
-        System.out.println("\n--- DELETE MEMBER ---");
+        System.out.println("\nDelete member\n");
         System.out.print("Enter ID, Name, or Username of the member to delete: ");
         String query = scanner.nextLine().trim();
 
@@ -764,7 +649,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         }
 
         System.out.println("\nMember found:");
-        targetUser.displayProfile();
+        System.out.println(targetUser.toString());
 
         System.out.print("Are you sure you want to delete this member? (y/n): ");
         String confirmation = scanner.nextLine().trim();
@@ -792,20 +677,12 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
     private static void runAdminMenu(Scanner scanner, Admin admin) {
         boolean sessionActive = true;
         while (sessionActive) {
-            System.out.println("\n========================================");
-            System.out.println("           ADMINISTRATOR MENU           ");
-            System.out.println("========================================");
-            System.out.println("1. Manage Users");
-            System.out.println("2. Manage Cars");
-            System.out.println("3. View Dealership Inventory");
-            System.out.println("4. Logout");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            adminMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
-            if (opt.equals("4") || opt.equalsIgnoreCase("Logout")) {
+            if (opt.equals("5") || opt.equalsIgnoreCase("Logout")) {
                 sessionActive = false;
-                System.out.println("Logged out successfully.");
+                System.out.println("Logged out successfully."); 
                 logger.writeLog(admin.getUsername(), "Admin logged out.");
             } else if (opt.equals("1")) {
                 runManageUsersMenu(scanner, admin);
@@ -814,6 +691,9 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             } else if (opt.equals("3")) {
                 dealership.displayAllCars();
                 logger.writeLog(admin.getUsername(), "Viewed full dealership inventory.");
+            } else if (opt.equals("4")) {
+                 System.out.println("Total Revenue: $" + dealership.getRevenue());
+                logger.writeLog(admin.getUsername(), "Viewed revenue.");
             } else {
                 System.out.println("Invalid option. Please try again.");
             }
@@ -827,18 +707,9 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * @param admin   the currently logged-in Admin instance
      */
     private static void runManageCarsMenu(Scanner scanner, Admin admin) {
+        Menu manageCars = new Menu(List.of("Add New Car", "View Cars (Display All or Search)", "Delete Car", "Back to Administrator Menu"), "MANAGE CARS");
         boolean managing = true;
         while (managing) {
-            System.out.println("\n========================================");
-            System.out.println("              MANAGE CARS               ");
-            System.out.println("========================================");
-            System.out.println("1. Add New Car");
-            System.out.println("2. View Cars (Display All or Search)");
-            System.out.println("3. Update Car (Price or Stock)");
-            System.out.println("4. Delete Car");
-            System.out.println("5. Back to Administrator Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -867,51 +738,41 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * Handles workflow for adding a new car.
      */
     private static void handleAdminAddCar(Scanner scanner, Admin admin) {
-        System.out.println("\n--- ADD NEW CAR ---");
-        System.out.print("Enter Car Type (Sedan, SUV, Hatchback, Pickup): ");
-        String carType = scanner.nextLine().trim();
-        if (!carType.equalsIgnoreCase("Sedan") && !carType.equalsIgnoreCase("SUV") && 
-            !carType.equalsIgnoreCase("Hatchback") && !carType.equalsIgnoreCase("Pickup")) {
-            System.out.println("Invalid car type. Operation cancelled.");
-            return;
-        }
+        System.out.println("\nAdd new car to the inventory \n");
+        try {
+            System.out.print("Enter Car Type (Sedan, SUV, Hatchback, Pickup): ");
+            String carType = Validator.validateCarType(scanner.nextLine());
+            System.out.print("Enter Model: ");
+            String model = Validator.validateString(scanner.nextLine());
+            System.out.print("Enter Condition (New, Used): ");
+            String condition = Validator.validateCondition(scanner.nextLine());
+            System.out.print("Enter Color: ");
+            String color = Validator.validateString(scanner.nextLine());
+            System.out.print("Enter Capacity (passengers): ");
+            int capacity = Validator.validateWholeNumber(scanner.nextLine(), "Capacity");
+            System.out.print("Enter Mileage: ");
+            int mileage = Validator.validateNonnegativeInt(scanner.nextLine(), "Mileage");
+            System.out.print("Enter Fuel Type: ");
+            String fuelType = Validator.validateString(scanner.nextLine());
+            System.out.print("Enter Transmission: ");
+            String transmission = Validator.validateString(scanner.nextLine());
+            System.out.print("Enter VIN: ");
+            String VIN = Validator.validateString(scanner.nextLine());
+            System.out.print("Enter Price ($): ");
+            double price = Validator.validatePrice(scanner.nextLine());
+            System.out.print("Enter Cars Available (stock): ");
+            int stock = Validator.validateNonnegativeInt(scanner.nextLine(), "Cars available");
 
-        System.out.print("Enter Model: ");
-        String model = scanner.nextLine().trim();
-        System.out.print("Enter Condition (New, Used): ");
-        String condition = scanner.nextLine().trim();
-        System.out.print("Enter Color: ");
-        String color = scanner.nextLine().trim();
-        
-        System.out.print("Enter Capacity (passengers): ");
-        int capacity = 0;
-        try { capacity = Integer.parseInt(scanner.nextLine().trim()); } catch (Exception e) {}
-
-        System.out.print("Enter Mileage: ");
-        int mileage = 0;
-        try { mileage = Integer.parseInt(scanner.nextLine().trim()); } catch (Exception e) {}
-
-        System.out.print("Enter Fuel Type: ");
-        String fuelType = scanner.nextLine().trim();
-        System.out.print("Enter Transmission: ");
-        String transmission = scanner.nextLine().trim();
-        System.out.print("Enter VIN: ");
-        String VIN = scanner.nextLine().trim();
-
-        System.out.print("Enter Price ($): ");
-        double price = 0.0;
-        try { price = Double.parseDouble(scanner.nextLine().trim()); } catch (Exception e) {}
-
-        System.out.print("Enter Cars Available (stock): ");
-        int stock = 0;
-        try { stock = Integer.parseInt(scanner.nextLine().trim()); } catch (Exception e) {}
-
-        boolean success = dealership.addCarToInventory(carType, model, condition, color, capacity, mileage, fuelType, transmission, VIN, price, stock);
-        if (success) {
-            System.out.println("Car added successfully to inventory!");
-            logger.writeLog(admin.getUsername(), "Added new car model: " + model);
-        } else {
-            System.out.println("Failed to add car.");
+            boolean success = dealership.addCarToInventory(carType, model, condition, color, capacity,
+                                                        mileage, fuelType, transmission, VIN, price, stock);
+            if (success) {
+                System.out.println("Car added successfully to inventory!");
+                logger.writeLog(admin.getUsername(), "Added new car model: " + model);
+            } else {
+                System.out.println("Failed to add car.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage() + " Operation cancelled.");
         }
     }
 
@@ -920,15 +781,9 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      */
     private static void runViewCarsMenu(Scanner scanner, Admin admin) {
         boolean viewing = true;
+        Menu viewCarsMenu = new Menu(List.of("Display All Cars", "Search for a Car by ID, Type, or Model", "Back to Manage Cars Menu"), "VIEW CARS");
         while (viewing) {
-            System.out.println("\n========================================");
-            System.out.println("               VIEW CARS                ");
-            System.out.println("========================================");
-            System.out.println("1. Display All Cars");
-            System.out.println("2. Search for a Car (ID, Type, Model)");
-            System.out.println("3. Back to Manage Cars Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            viewCarsMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -971,18 +826,12 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         }
 
         System.out.println("\nCar found:");
-        targetCar.displayInformation();
+        System.out.println(targetCar.toString());;
 
+        Menu updateCarMenu = new Menu(List.of("Change Price", "Update Cars Available (Stock)", "Back to Manage Cars Menu"), "UPDATE CAR");
         boolean updating = true;
         while (updating) {
-            System.out.println("\n========================================");
-            System.out.println("            UPDATE CAR MENU             ");
-            System.out.println("========================================");
-            System.out.println("1. Change Price");
-            System.out.println("2. Change Cars Available (Stock)");
-            System.out.println("3. Back to Manage Cars Menu");
-            System.out.println("========================================");
-            System.out.print("Please select an option: ");
+            updateCarMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -1031,7 +880,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
      * Handles deleting a car with confirmation.
      */
     private static void handleAdminDeleteCar(Scanner scanner, Admin admin) {
-        System.out.println("\n--- DELETE CAR ---");
+        System.out.println("\nDelete Car\n");
         System.out.print("Enter ID, Type, or Model of the car to delete: ");
         String query = scanner.nextLine().trim();
         if (query.isEmpty()) return;
@@ -1043,7 +892,7 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
         }
 
         System.out.println("\nCar found:");
-        targetCar.displayInformation();
+        System.out.println(targetCar.toString());
 
         System.out.print("Are you sure you want to delete this car? (y/n): ");
         String confirmation = scanner.nextLine().trim();
@@ -1060,7 +909,4 @@ if (input.equalsIgnoreCase("EXIT") || input.equals("3")) {
             System.out.println("Deletion cancelled.");
         }
     }
-
-    
-
 }

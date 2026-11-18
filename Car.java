@@ -1,10 +1,10 @@
 /**
- * Abstract base class representing a generic vehicle in the Miner Cars Dealership system.
- * Serves as the superclass for specific car types such as Sedan, SUV, Hatchback, and Pickup.
+ * Represents a generic vehicle in the dealership system.
+ * Serves as the superclass for specific car types.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
- * @version 1.0
- * @since November 10, 2026
+ * @version 2.0
+ * @since November 17, 2026
  */
 public abstract class Car {
     private final int id;
@@ -19,11 +19,11 @@ public abstract class Car {
     private final String fuelType;
     private final String VIN;
     private int carsAvailable; // Number of cars available in the inventory
+    private static int nextAvailableID = 1; 
 
     /**
      * Constructs a new Car with all its specific attributes.
      * 
-     * @param id            Unique identifier for the car
      * @param carType       Type of the car (e.g., Sedan, SUV)
      * @param model         Model name of the car
      * @param condition     Condition of the car (e.g., New, Used)
@@ -133,26 +133,16 @@ public abstract class Car {
     /** @return The number of cars available */
     public int getCarsAvailable() { return this.carsAvailable; }
 
-    // ==================== Display Methods ====================
+    // ==================== toString method ====================
 
-    /**
-     * Prints all generic attributes and values of the car to the console in a formatted layout.
+    /** Overridden toString method 
+     * @return String containing all profile information except the password
      */
-    public void displayInformation() {
-        System.out.println("-------------------------------------------");
-        System.out.println("Car ID: " + this.id);
-        System.out.println("Car Type: " + this.carType);
-        System.out.println("Model: " + this.model);
-        System.out.println("Condition: " + this.condition);
-        System.out.println("Price: $" + this.price);
-        System.out.println("Color: " + this.color);
-        System.out.println("Capacity: " + this.capacity + " passengers");
-        System.out.println("Mileage: " + this.mileage + " miles");
-        System.out.println("Transmission: " + this.transmission);
-        System.out.println("Fuel Type: " + this.fuelType);
-        System.out.println("VIN: " + this.VIN);
-        System.out.println("Cars Available: " + this.carsAvailable);
-        System.out.println("-------------------------------------------");
+    @Override
+    public String toString() {
+        return String.format("%-5d %-12s %-18s %-10s $%-12.2f %-10s %-5d %-10d %-12s %-10s %-18s %-5d",
+            this.id, this.carType, this.model, this.condition, this.price, this.color,
+            this.capacity, this.mileage, this.transmission, this.fuelType, this.VIN, this.carsAvailable);
     }
 
     /**
