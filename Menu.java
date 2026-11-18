@@ -15,7 +15,7 @@ public class Menu {
     /**
      * Constructs a Menu with a given list of options.
      * @param options list of string descriptions for menu choices
-     * @param name the title of the menu
+     * @param nameIn the title of the menu
      */
     public Menu(List<String> options, String nameIn) {
         this.options = options;

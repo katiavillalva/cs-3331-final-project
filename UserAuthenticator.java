@@ -7,7 +7,6 @@ public class UserAuthenticator {
     /** The dealership to authenticate the user within */
     private final CarDealership dealership;
 
-
     /** One-argument constructor
      * @param dealership the dealership to link the authenticator to
      */
@@ -16,21 +15,12 @@ public class UserAuthenticator {
     }
 
     /** Checks that the user credential match a user in the system
-    /** @return the User if the username and password match a user in the system null otherwise */
+    /** @return the User if the username and password match the user's in the system, null otherwise */
     public User authenticate(String username, String password) {
         User user = this.dealership.getUsers().get(username);
         if (user == null || !user.getPassword().equals(password)) {
             return null;
         }
         return user;
-    }
-
-    /** Authenticates the user and returns the user if it is an Admin */
-    /** @return the user if it is an Admin object, null otherwise */
-    public User authorizeAdmin(String username, String password) {
-        User user = authenticate(username, password);
-        if (user instanceof Admin)
-            return user;
-        return null;
     }
 }

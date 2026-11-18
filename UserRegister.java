@@ -2,8 +2,7 @@
 import java.util.Scanner;
 
 /**
- * Class which handles the logic for a user who is not an admin registering in the system.
- * Guests can only register customer accounts.
+ * Class which handles the logic for a user who is not an admin registering an new account in the system.
  *
  * @author Jean Jose Rendon Sifontes, Katia Villalva
  * @version 1.0
@@ -12,9 +11,8 @@ import java.util.Scanner;
 public class UserRegister extends Register {
     /**
      * Constructs a UserRegister object with a given dealership and logger.
-     *
      * @param dealership the dealership that stores the new user
-     * @param logger     the logger that records the registration
+     * @param logger the logger that records the registration
      */
     public UserRegister(CarDealership dealership, Log logger) {
         super(dealership, logger);
@@ -43,7 +41,7 @@ public class UserRegister extends Register {
     }
 
     /**
-     * Gets whether the new user is a member.
+     * Gets whether the new user is a member of the dealership.
      * @param scanner the scanner reading input from the console
      * @return true if the new user is a member, false otherwise
      * @throws IllegalArgumentException if the input is not y or n

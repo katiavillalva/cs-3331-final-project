@@ -7,13 +7,13 @@ import java.util.List;
  * @since November 17, 2026
  */
 public class UserFactory {
-    /** The valid user types (lowercase). Must match the cases in createUser. */
+    /** The valid user types */
     public static final List<String> USER_TYPES = List.of("admin", "customer");
 
     /**
-     * Creates the User subclass matching the given type.
-     * moneyAvailable and isMember are only applied to Customers.
-     * @return an Admin or Customer, or null if the type is not recognized
+     * Creates the User subclass object matching the given  user type.
+     * moneyAvailable and isMember are only aattributes of Customers.
+     * @return an Admin or Customer, or null if the user type iis invalid
      */
     public User createUser(int userID, String firstName, String lastName, String username,
                            String password, String userType, double moneyAvailable, boolean isMember) {

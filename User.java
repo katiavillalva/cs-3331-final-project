@@ -2,7 +2,7 @@ import java.util.Set;
 
 /**
  * Represents a general registered user in the system. 
- * Extends the abstract class {@link Person} and serves as the superclass for Customer and Admin.
+ * Extends Person and serves as the superclass for Customer and Admin.
  * 
  * @author Jean Jose Rendon Sifontes, Katia Villalva
  * @version 2.0
@@ -13,7 +13,9 @@ public abstract class User extends Person {
     protected final String userType;
     protected String username;
     protected String password;
+    public static final String HEADER = buildHeader();
 
+    // ==================== Constructor  ====================
     /**
      * Constructs a new User with the specified details.
      * 
@@ -34,7 +36,7 @@ public abstract class User extends Person {
     // ==================== Setters with Validation ====================
 
     /**
-     * Sets the user's username to the inputted username if no other user has it.
+     * Sets the username to the inputted username if no other user has it.
      * Throws an exception if the username already exists in the system.
      * 
      * @param usernames the set of all existing usernames in the system
@@ -49,7 +51,7 @@ public abstract class User extends Person {
     }
 
     /**
-     * Sets the user's password to the inputted password if it is different from the old password.
+     * Sets the password to the inputted password if it is different from the old password.
      * Throws an exception if the new password matches the current one.
      * 
      * @param password the new password
@@ -64,19 +66,34 @@ public abstract class User extends Person {
 
     // ==================== Getters ====================
 
-    /** @return the user's unique ID */
+    /** Getter for userID
+     *  @return the user's unique ID 
+     * */
     public int getUserID() { return this.userID; }
 
-    /** @return the user's type ("Admin" or "Customer") */
+    /** Getter for userType 
+    * @return the user's type ("Admin" or "Customer") 
+    */
     public String getUserType() { return this.userType; }
 
-    /** @return the user's unique username */
+    /** Getter for username
+     * @return the user's unique username */
     public String getUsername() { return this.username; }
 
-    /** @return the user's password */
+    /** Getter for password
+     * @return the user's password */
     public String getPassword() { return this.password; }
 
     // ==================== toString method ====================
+    /**
+     * Builds the column labels for the user table, lined up with toString().
+     * @return the labels followed by a divider line
+     */
+    private static String buildHeader() {
+        String labels = String.format("%-5s %-15s %-15s %-15s %-13s %-8s %-8s",
+            "ID", "First Name", "Last Name", "Username", "Balance", "Member", "Type");
+        return labels + "\n" + "-".repeat(labels.length());
+    }
 
     @Override
      /** Overridden toString method 

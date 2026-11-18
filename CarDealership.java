@@ -128,6 +128,7 @@ public class CarDealership {
      * @param cars the list of cars to display
      */
     public void displayCars(List<Car> cars) {
+        System.out.println(Car.HEADER);
         for (Car car : cars) {
             System.out.println(car.toString());
         }
@@ -295,17 +296,14 @@ public class CarDealership {
      * Displays all registered users in the dealership's user map.
      */
     public void displayAllMembers() {
-        System.out.println("\n========================================");
-        System.out.println("          ALL REGISTERED USERS          ");
-        System.out.println("========================================");
         if (this.users.isEmpty()) {
             System.out.println("No users registered in the system.");
             return;
         }
+        System.out.println(User.HEADER);
         for (User user : this.users.values()) {
             System.out.println(user.toString());
         }
-        System.out.println("========================================");
     }
 
     /**

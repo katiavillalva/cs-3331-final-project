@@ -113,7 +113,7 @@ public class Validator {
         return validateOption(input, CarFactory.CAR_CONDITION_TYPES, "car condition");
     }
 
-    /** Returns the trimmed input if it is nonempty and doe not contain commas 
+    /** Returns the trimmed input if it is nonempty and does not contain commas 
      * @param input the String to validate
      * @return the trimmed String if it is valid 
      * @throws IllegalArgumentException if the String is invalid

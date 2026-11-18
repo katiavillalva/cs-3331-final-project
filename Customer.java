@@ -77,8 +77,8 @@ public class Customer extends User {
      */
     public boolean updateMoneyAvailable(double amountIn) {
         if (this.moneyAvailable + amountIn < 0) {
-            System.out.println("Insufficient funds. Cannot deduct $" + (-amountIn) + " from available money.");
-            System.out.println("Current available money: $" + this.moneyAvailable);
+            System.out.printf("Insufficient funds. Cannot deduct $%.2f from available money.%n", -amountIn);
+            System.out.printf("Current available money: $%.2f%n", this.moneyAvailable);
             return false; // Insufficient funds, cannot deduct
         } 
         this.moneyAvailable += amountIn;

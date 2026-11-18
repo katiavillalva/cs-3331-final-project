@@ -281,7 +281,7 @@ public class RunShop {
 
             System.out.println("\nCongratulations! Purchase successful!");
             System.out.println("You bought the " + targetCar.getModel() + ".");
-            System.out.println("Remaining balance: $" + customer.getMoneyAvailable());
+            System.out.printf("Remaining balance: $%.2f%n", customer.getMoneyAvailable());
 
             logger.writeLog(customer.getUsername(), "Purchased car ID " + targetCar.getId());
         } else {
@@ -303,6 +303,7 @@ public class RunShop {
 
             switch (opt) {
                 case "1":
+                    System.out.println(User.HEADER);
                     System.out.println(customer.toString());
                     logger.writeLog(customer.getUsername(), "Viewed profile details.");
                     break;
@@ -428,7 +429,7 @@ public class RunShop {
             double newTotal = customer.getMoneyAvailable();
 
             System.out.println("Money updated successfully!");
-            System.out.println("Added: $" + additionalMoney + " | New Total Balance: $" + newTotal);
+            System.out.printf("Added: $%.2f | New Total Balance: $%.2f%n", additionalMoney, newTotal);
             logger.writeLog(customer.getUsername(), "Added $" + additionalMoney + " to balance. New total: $" + newTotal);
         } catch (IllegalArgumentException e) {
             logger.writeLog(customer.getUsername(), "Failed attempt to update account balance.");
@@ -546,6 +547,7 @@ public class RunShop {
         }
 
         System.out.println("\nMember found:");
+        System.out.println(User.HEADER);
         System.out.println(targetUser.toString());
         Menu updateMemberMenu = new Menu(List.of("Change Name", "Change Username", "Change Password", "Back to Manage Users Menu"), "UPDATE MEMBER");
 
@@ -621,7 +623,7 @@ public class RunShop {
      * and deletes them upon confirmation.
      * 
      * @param scanner active console scanner
-     * @param admin   the currently logged-in Admin instance
+     * @param admin   the currently logged-in Admin
      */
     private static void handleAdminDeleteMember(Scanner scanner, Admin admin) {
         System.out.println("\nDelete member\n");
@@ -641,7 +643,15 @@ public class RunShop {
             return;
         }
 
+        // Return if the admin attempts to delete their own account 
+        if (targetUser == admin) {
+            System.out.println("You cannot delete your own account while logged in.");
+            logger.writeLog(admin.getUsername(), "Attempted to delete own account.");
+        return;
+        }
+
         System.out.println("\nMember found:");
+        System.out.println(User.HEADER);
         System.out.println(targetUser.toString());
 
         System.out.print("Are you sure you want to delete this member? (y/n): ");
@@ -823,6 +833,7 @@ public class RunShop {
         }
 
         System.out.println("\nCar found:");
+        System.out.println(Car.HEADER);
         System.out.println(targetCar.toString());;
 
         Menu updateCarMenu = new Menu(List.of("Change Price", "Update Cars Available (Stock)", "Back to Manage Cars Menu"), "UPDATE CAR");
@@ -884,6 +895,7 @@ public class RunShop {
         }
 
         System.out.println("\nCar found:");
+        System.out.println(Car.HEADER);
         System.out.println(targetCar.toString());
 
         System.out.print("Are you sure you want to delete this car? (y/n): ");

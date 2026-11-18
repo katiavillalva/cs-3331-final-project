@@ -19,7 +19,7 @@ public abstract class Car {
     private final String fuelType;
     private final String VIN;
     private int carsAvailable; // Number of cars available in the inventory
-    private static int nextAvailableID = 1; 
+    public static final String HEADER = buildHeader();
 
     /**
      * Constructs a new Car with all its specific attributes.
@@ -134,6 +134,17 @@ public abstract class Car {
     public int getCarsAvailable() { return this.carsAvailable; }
 
     // ==================== toString method ====================
+
+     /**
+     * Builds the column labels for the car table, lined up with toString().
+     * @return the labels followed by a divider line
+     */
+    private static String buildHeader() {
+        String labels = String.format("%-5s %-12s %-18s %-10s %-13s %-10s %-5s %-10s %-12s %-10s %-18s %-5s",
+            "ID", "Type", "Model", "Condition", "Price", "Color", "Seats", "Mileage",
+            "Transmission", "Fuel", "VIN", "Stock");
+        return labels + "\n" + "-".repeat(labels.length());
+    }
 
     /** Overridden toString method 
      * @return String containing all profile information except the password
