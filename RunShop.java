@@ -79,11 +79,12 @@ public class RunShop {
      * the session to role-specific menus (Admin or Customer).
      * 
      * @param scanner active console scanner
+     * @return true if the login was successful, false otherwise
      */
     private static boolean handleLogin(Scanner scanner) {
         System.out.println("\nLogin \n");
         System.out.print("Enter username: ");
-        String username = Validator.validateString(scanner.nextLine());
+        String username = scanner.nextLine().trim();
         System.out.print("Enter password: ");
         String password = scanner.nextLine().trim();
 
@@ -91,7 +92,7 @@ public class RunShop {
 
         if (authenticatedUser == null) {
             System.out.println("Invalid username or password. Please try again.");
-            logger.writeLog("", "Failed login attempt for username: " + username);
+            logger.writeLog("Guest", "Failed login attempt for username: " + username);
             return false;
         }
         System.out.println("\nLogin successful! Welcome back, " + authenticatedUser.getFirstName() + "!");
@@ -237,11 +238,11 @@ public class RunShop {
         dealership.displayAvailableCars();
         
         System.out.print("\nEnter the ID of the car you wish to purchase (or 0 to cancel): ");
-        int carId = -1;
+        int carId;
         try {
-            carId = Integer.parseInt(scanner.nextLine().trim());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid ID format. Purchase cancelled.");
+            carId = Validator.validateNonnegativeInt(scanner.nextLine(), "Car ID");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage() + " Purchase cancelled.");
             return;
         }
 
@@ -359,14 +360,9 @@ public class RunShop {
     private static void handleChangeUsername(Scanner scanner, Customer customer) {
         System.out.println("\nChange username \n");
         System.out.print("Enter new username: ");
-        String newUsername = scanner.nextLine().trim();
-
-        if (newUsername.isEmpty()) {
-            System.out.println("Username cannot be empty. Update cancelled.");
-            return;
-        }
 
         try {
+            String newUsername = Validator.validateString(scanner.nextLine());
             String oldUsername = customer.getUsername();
             
             // Encapsulated validation and setting handled by User class
@@ -375,14 +371,15 @@ public class RunShop {
             // Re-indexing the dealership map since the key (username) changed
             dealership.getUsers().remove(oldUsername);
             dealership.getUsers().put(newUsername, customer);
+            dealership.saveUsersToCSV();
 
             System.out.println("Username updated successfully to: " + newUsername);
             logger.writeLog(newUsername, "Changed username from " + oldUsername + " to " + newUsername);
             
         } catch (IllegalArgumentException e) {
             // Displaying the validation error message thrown by User class
-            System.out.println(e.getMessage());
-            logger.writeLog(customer.getUsername(), "Failed username change attempt (Username already taken: " + newUsername + ")");
+            System.out.println(e.getMessage() + " Update cancelled.");
+            logger.writeLog(customer.getUsername(), "Failed username change attempt: " + e.getMessage());
         }
     }
 
@@ -394,21 +391,24 @@ public class RunShop {
      */
     private static void handleChangePassword(Scanner scanner, Customer customer) {
         System.out.println("\nChange password \n");
-        System.out.print("Enter new password: ");
-        String newPassword = scanner.nextLine().trim();
-
-        if (newPassword.isEmpty()) {
-            System.out.println("Password cannot be empty. Update cancelled.");
+        System.out.print("Enter current password: ");
+        String currentPassword = scanner.nextLine().trim();
+        if (authorizer.authenticate(customer.getUsername(), currentPassword) == null) {
+            System.out.println("Incorrect password. Update cancelled.");
+            logger.writeLog(customer.getUsername(), "Failed password change attempt: incorrect current password.");
             return;
         }
+
         try {
+            System.out.print("Enter new password: ");
+            String newPassword = Validator.validateString(scanner.nextLine());
             customer.setPassword(newPassword);
             dealership.saveUsersToCSV();
             System.out.println("Password updated successfully!");
             logger.writeLog(customer.getUsername(), "Changed password successfully.");
         } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            logger.writeLog(customer.getUsername(), "Failed password change attempt: New password matches old password.");
+            System.out.println(e.getMessage() + " Update cancelled.");
+            logger.writeLog(customer.getUsername(), "Failed password change attempt: " + e.getMessage());
         }
     }
 
@@ -445,7 +445,7 @@ public class RunShop {
      */
     private static void runManageUsersMenu(Scanner scanner, Admin admin) {
         boolean managing = true;
-        Menu manageUsersMenu = new Menu(List.of("Add New User (Customer or Admin", "View All Members", "Update Member","Delete Member", "Back to Administrator Menu"), "MANAGE USERS");
+        Menu manageUsersMenu = new Menu(List.of("Add New User (Customer or Admin)", "View All Members", "Update Member","Delete Member", "Back to Administrator Menu"), "MANAGE USERS");
         while (managing) {
             manageUsersMenu.displayOptions();
             String opt = scanner.nextLine().trim();
@@ -551,34 +551,30 @@ public class RunShop {
 
         boolean updatingMember = true;
         while (updatingMember) {
+            updateMemberMenu.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
                 case "1":
-                    System.out.print("Enter new first name: ");
-                    String newFirst = scanner.nextLine().trim();
-                    System.out.print("Enter new last name: ");
-                    String newLast = scanner.nextLine().trim();
-                    
-                    if (!newFirst.isEmpty() && !newLast.isEmpty()) {
+                    try {
+                        System.out.print("Enter new first name: ");
+                        String newFirst = Validator.validateString(scanner.nextLine());
+                        System.out.print("Enter new last name: ");
+                        String newLast = Validator.validateString(scanner.nextLine());
                         targetUser.setFirstName(newFirst);
                         targetUser.setLastName(newLast);
+                        dealership.saveUsersToCSV();
                         System.out.println("Name updated successfully!");
                         logger.writeLog(admin.getUsername(), "Updated name for user ID " + targetUser.getUserID());
-                    } else {
-                        System.out.println("Names cannot be empty. Update cancelled.");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage() + " Update cancelled.");
                     }
                     break;
 
                 case "2":
                     System.out.print("Enter new username: ");
-                    String newUsername = scanner.nextLine().trim();
-                    if (newUsername.isEmpty()) {
-                        System.out.println("Username cannot be empty.");
-                        break;
-                    }
-
                     try {
+                        String newUsername = Validator.validateString(scanner.nextLine());
                         String oldUsername = targetUser.getUsername();
                         
                         // Using User's built-in validation method with the dealership's username set
@@ -592,23 +588,20 @@ public class RunShop {
                         System.out.println("Username updated successfully to: " + newUsername);
                         logger.writeLog(admin.getUsername(), "Updated username from " + oldUsername + " to " + newUsername);
                     } catch (IllegalArgumentException e) {
-                        System.out.println(e.getMessage());
+                        System.out.println(e.getMessage() + " Update cancelled.");
                     }
                     break;
 
                 case "3":
                     System.out.print("Enter new password: ");
-                    String newPassword = scanner.nextLine().trim();
-                    if (!newPassword.isEmpty()) {
-                        try {
-                            targetUser.setPassword(newPassword);
-                            System.out.println("Password updated successfully!");
-                            logger.writeLog(admin.getUsername(), "Updated password for user ID " + targetUser.getUserID());
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                        }
-                    } else {
-                        System.out.println("Password cannot be empty.");
+                    try {
+                        String newPassword = Validator.validateString(scanner.nextLine());
+                        targetUser.setPassword(newPassword);
+                        dealership.saveUsersToCSV();
+                        System.out.println("Password updated successfully!");
+                        logger.writeLog(admin.getUsername(), "Updated password for user ID " + targetUser.getUserID());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage() + " Update cancelled.");
                     }
                     break;
 
@@ -707,9 +700,10 @@ public class RunShop {
      * @param admin   the currently logged-in Admin instance
      */
     private static void runManageCarsMenu(Scanner scanner, Admin admin) {
-        Menu manageCars = new Menu(List.of("Add New Car", "View Cars (Display All or Search)", "Delete Car", "Back to Administrator Menu"), "MANAGE CARS");
+        Menu manageCars = new Menu(List.of("Add New Car", "View Cars (Display All or Search)", "Update Car (Price or Stock)", "Delete Car", "Back to Administrator Menu"), "MANAGE CARS");
         boolean managing = true;
         while (managing) {
+            manageCars.displayOptions();
             String opt = scanner.nextLine().trim();
 
             switch (opt) {
@@ -817,7 +811,10 @@ public class RunShop {
         System.out.println("\n--- UPDATE CAR ---");
         System.out.print("Enter ID, Type, or Model of the car to update: ");
         String query = scanner.nextLine().trim();
-        if (query.isEmpty()) return;
+        if (query.isEmpty()) {
+            System.out.println("Search query cannot be empty.");
+            return;
+        }
 
         Car targetCar = dealership.findCar(query);
         if (targetCar == null) {
@@ -838,33 +835,25 @@ public class RunShop {
                 case "1":
                     System.out.print("Enter new price ($): ");
                     try {
-                        double newPrice = Double.parseDouble(scanner.nextLine().trim());
-                        if (newPrice >= 0) {
-                            targetCar.setPrice(newPrice);
-                            dealership.saveCarsToCSV();
-                            System.out.println("Price updated successfully!");
-                            logger.writeLog(admin.getUsername(), "Updated price for car ID " + targetCar.getId());
-                        } else {
-                            System.out.println("Price cannot be negative.");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid number format.");
+                        double newPrice = Validator.validatePrice(scanner.nextLine());
+                        targetCar.setPrice(newPrice);
+                        dealership.saveCarsToCSV();
+                        System.out.println("Price updated successfully!");
+                        logger.writeLog(admin.getUsername(), "Updated price for car ID " + targetCar.getId());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage() + " Update cancelled.");
                     }
                     break;
                 case "2":
                     System.out.print("Enter new available count: ");
                     try {
-                        int newStock = Integer.parseInt(scanner.nextLine().trim());
-                        if (newStock >= 0) {
-                            targetCar.setCarsAvailable(newStock);
-                            dealership.saveCarsToCSV();
-                            System.out.println("Stock updated successfully!");
-                            logger.writeLog(admin.getUsername(), "Updated stock for car ID " + targetCar.getId());
-                        } else {
-                            System.out.println("Stock cannot be negative.");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid number format.");
+                        int newStock = Validator.validateNonnegativeInt(scanner.nextLine(), "Stock");
+                        targetCar.setCarsAvailable(newStock);
+                        dealership.saveCarsToCSV();
+                        System.out.println("Stock updated successfully!");
+                        logger.writeLog(admin.getUsername(), "Updated stock for car ID " + targetCar.getId());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage() + " Update cancelled.");
                     }
                     break;
                 case "3":
@@ -883,7 +872,10 @@ public class RunShop {
         System.out.println("\nDelete Car\n");
         System.out.print("Enter ID, Type, or Model of the car to delete: ");
         String query = scanner.nextLine().trim();
-        if (query.isEmpty()) return;
+        if (query.isEmpty()) {
+            System.out.println("Search query cannot be empty.");
+            return;
+        }
 
         Car targetCar = dealership.findCar(query);
         if (targetCar == null) {
